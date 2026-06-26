@@ -4,6 +4,13 @@ class TiposAtendimentos
 {
     private PDO $pdo;
 
+    private function jsonResponse(array $data, int $statusCode = 200): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
     public function __construct()
     {
 
@@ -16,8 +23,7 @@ class TiposAtendimentos
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
         if (!$id) {
-            http_response_code(400);
-            echo json_encode(['erro' => 'ID invalido.']);
+            $this->jsonResponse(['erro' => 'ID invalido.'], 400);
             return;
         }
 
@@ -32,12 +38,10 @@ class TiposAtendimentos
         $tipos_atendimentos = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$tipos_atendimentos) {
-            http_response_code(404);
-            echo json_encode(['erro' => 'Tipo de atendimentos não encontrado.']);
+            $this->jsonResponse(['erro' => 'Tipo de atendimentos não encontrado.'], 404);
             return;
         }
-        http_response_code(200);
-        echo json_encode($tipos_atendimentos, JSON_UNESCAPED_UNICODE);
+        $this->jsonResponse($tipos_atendimentos, 200);
     }
 
     public function criarTipoAtendimento(): void
@@ -47,8 +51,7 @@ class TiposAtendimentos
         $status = $_POST['status'] ?? 'ativo';
 
         if ($nome === '') {
-            http_response_code(400);
-            echo json_encode(['erro' => 'Nome do atendimento é obrigatorio']);
+            $this->jsonResponse(['erro' => 'Nome do atendimento é obrigatorio'], 400);
             return;
         }
 
@@ -62,11 +65,10 @@ class TiposAtendimentos
             $stmt->bindValue(':status', $status);
             $stmt->execute();
 
-            http_response_code(201);
-            echo json_encode(['mensagem' => 'Tipo de Atendimento cadastrado com sucesso.'], JSON_UNESCAPED_UNICODE);
+            $this->jsonResponse(['mensagem' => 'Tipo de Atendimento cadastrado com sucesso.'], 201);
         } catch (PDOException $e) {
             $this->jsonResponse(['erro' => 'Erro ao cadastrar Tipo de Atendimento'], 500);
-
+            return;
         }
     }
 
@@ -91,9 +93,11 @@ class TiposAtendimentos
 
         if (!$id) {
             $this->jsonResponse(['erro' => 'ID é obrigatorio.'], 400);
+            return;
         }
         if (!in_array($status, ['ativo', 'inativo'], true)) {
             $this->jsonResponse(['erro' => 'Status invalido.'], 400);
+            return;
         }
 
         try {
@@ -113,6 +117,7 @@ class TiposAtendimentos
             $this->jsonResponse(['mensagem' => 'Tipo de atendimento atualizado com sucesso']);
         } catch (PDOException $e) {
             $this->jsonResponse(['erro' => 'Erro ao atualizar tipo de atendimento.'], 500);
+            return;
         }
     }
 
@@ -122,6 +127,7 @@ class TiposAtendimentos
 
         if (!$id) {
             $this->jsonResponse(['erro' => 'ID inválido'], 400);
+            return;
         }
 
         try {
@@ -133,6 +139,7 @@ class TiposAtendimentos
             $this->jsonResponse(['mensagem' => 'Tipo de atendimento excluido com sucesso']);
         } catch (PDOException $e) {
             $this->jsonResponse(['erro' => 'Erro ao deletar tipo de atendimento'], 500);
+            return;
         }
     }
 }

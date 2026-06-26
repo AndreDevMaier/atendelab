@@ -4,6 +4,13 @@ class AtendimentosController
 {
     private PDO $pdo;
 
+    private function jsonResponse(array $data, int $statusCode = 200): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
     public function __construct()
     {
         require __DIR__ . '/../../config/database.php';
@@ -117,21 +124,24 @@ class AtendimentosController
     }
     public function excluirAtendimento(): void
     {
+        header('Content-Type: application/json; charset=utf-8');
+
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
         if (!$id) {
             $this->jsonResponse(['erro' => 'ID inválido'], 400);
+            return;
         }
         try {
             $sql = 'DELETE FROM atendimentos WHERE id = :id';
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
-            echo json_encode(['mensagem' => 'Atendimento excluído com sucesso.']);
+            $this->jsonResponse(['mensagem' => 'Atendimento excluído com sucesso.']);
 
         } catch (PDOException $e) {
-            http_response_code(500);
-            echo json_encode(['erro' => 'Erro ao excluir atendimento: ' . $e->getMessage()]);
+            $this->jsonResponse(['erro' => 'Erro ao excluir atendimento: ' . $e->getMessage()], 500);
+            return;
         }
     }
 }
