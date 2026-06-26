@@ -72,7 +72,7 @@ class TiposAtendimentos
         }
     }
 
-     public function listarTipoAtendimento(): void
+    public function listarTipoAtendimento(): void
     {
         $sql = 'SELECT id, nome, descricao, status
                 FROM tipos_atendimentos
