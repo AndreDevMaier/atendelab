@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$porta = "3307";
+$porta = "3306";
 $banco = "atendelab";
 $usuario = "root";
 $senha = "";   // senha vazia (padrão XAMPP)
